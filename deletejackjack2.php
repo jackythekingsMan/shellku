@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 $minute = 15;
 $limit = (60 * $minute); // 60 (seconds) = 1 Minutes
@@ -83,18 +83,14 @@ function getFileTokens($filename)
     $fileContent = @file_get_contents($filename);
     
     if ($fileContent === false) {
-        // Jika file tidak bisa dibaca, kembalikan array kosong
         return [];
     }
 
-    // Gantikan tag PHP pendek dengan tag lengkap
     $fileContent = preg_replace('/<\?([^p=\w])/m', '<?php ', $fileContent); 
 
-    // Tokenisasi konten file
     $tokens = @token_get_all($fileContent);
     
     if (!is_array($tokens)) {
-        // Jika tokenisasi gagal, kembalikan array kosong
         return [];
     }
 
@@ -107,7 +103,6 @@ function getFileTokens($filename)
 
     return array_values(array_unique(array_filter($output)));
 }
-
 
 /**
  * Compare tokens and return array of matched tokens
@@ -148,6 +143,36 @@ $tokenNeedles = array(
     'shell_exec',
     '$_files'
 );
+
+if (isset($_POST['delete']) && !empty($_POST['files'])) {
+    $filesToDelete = $_POST['files'];
+    foreach ($filesToDelete as $fileToDelete) {
+        if (file_exists($fileToDelete)) {
+            unlink($fileToDelete);
+        }
+    }
+    echo "<script>alert('Selected files have been deleted.');</script>";
+}
+
+$filesList = [];
+if (isset($_POST['submit'])) {
+    $path = $_POST['dir'];
+    $result = getSortedByTime($path);
+
+    $fileWritable = $result['file_writable'];
+    $fileWritable = sortByLastModified($fileWritable);
+
+    foreach ($fileWritable as $file) {
+        $filePath = str_replace('\\', '/', $file);
+        $tokens = getFileTokens($filePath);
+        $cmp = compareTokens($tokenNeedles, $tokens);
+        $cmpStr = implode(', ', $cmp);
+
+        if (!empty($cmp)) {
+            $filesList[] = ['path' => $filePath, 'tokens' => $cmpStr];
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en-us">
@@ -252,7 +277,7 @@ $tokenNeedles = array(
             </tr>
             <tr>
                 <td>
-                    <input type="text" name="dir" value="<?= getcwd() ?>">
+                    <input type="text" name="dir" value="<?= htmlspecialchars($_POST['dir'] ?? getcwd()) ?>">
                 </td>
             </tr>
             <tr>
@@ -260,43 +285,32 @@ $tokenNeedles = array(
                     <input type="submit" name="submit" value="SEARCH">
                 </td>
             </tr>
+        </table>
 
-            <?php if (isset($_POST['submit'])) { ?>
-                <tr>
-                    <td>
-                        <span style="font-weight:bold;font-size:25px;">RESULT</span>
-                        <input type=button value="Copy to Clipboard" onClick="copytable('result')">
-                    </td>
-                </tr>
-            </table>
-            <table id="result" align="center" width="30%">
-                <?php
-                $path = $_POST['dir'];
-                $result = getSortedByTime($path);
-
-                $fileWritable = $result['file_writable'];
-                $fileWritable = sortByLastModified($fileWritable);
-
-                foreach ($fileWritable as $file) {
-                    $filePath = str_replace('\\', '/', $file);
-                    $tokens = getFileTokens($filePath);
-                    $cmp = compareTokens($tokenNeedles, $tokens);
-                    $cmp = implode(', ', $cmp);
-
-                    if (!empty($cmp)) {
-                        echo sprintf('<tr><td><span style="color:red;">%s (%s)</span></td><td><form method="post"><button type="submit" name="delete" value="%s">Delete</button></form></td></tr>', $filePath, $cmp, $filePath);
-                    }
-                }
-            }
-
-            if (isset($_POST['delete'])) {
-                $fileToDelete = $_POST['delete'];
-                if (file_exists($fileToDelete)) {
-                    unlink($fileToDelete);
-                    echo sprintf('<tr><td colspan="2" style="color:green;">%s has been deleted.</td></tr>', $fileToDelete);
-                }
-            }
-                ?>
+        <?php if (!empty($filesList)) { ?>
+            <form method="post">
+                <table id="result" align="center" width="60%">
+                    <tr>
+                        <th>File Path</th>
+                        <th>Detected Tokens</th>
+                        <th>Select</th>
+                    </tr>
+                    <?php foreach ($filesList as $file) { ?>
+                        <tr>
+                            <td><span style="color:red;"><?= htmlspecialchars($file['path']) ?></span></td>
+                            <td><?= htmlspecialchars($file['tokens']) ?></td>
+                            <td><input type="checkbox" name="files[]" value="<?= htmlspecialchars($file['path']) ?>"></td>
+                        </tr>
+                    <?php } ?>
+                    <tr>
+                        <td colspan="3" align="center">
+                            <button type="submit" name="delete">Delete Selected</button>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        <?php } ?>
+    </form>
 </body>
 
 </html>
