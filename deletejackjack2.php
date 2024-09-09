@@ -277,7 +277,7 @@ if (isset($_POST['submit'])) {
             </tr>
             <tr>
                 <td>
-                    <input type="text" name="dir" value="<?= htmlspecialchars($_POST['dir'] ?? getcwd()) ?>">
+                <input type="text" name="dir" value="<?= htmlspecialchars(isset($_POST['dir']) ? $_POST['dir'] : getcwd()) ?>">
                 </td>
             </tr>
             <tr>
