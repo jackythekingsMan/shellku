@@ -10,7 +10,7 @@ $files = [
     ],
 ];
 
-$tempDir = '/home/qualidad/tmp/';
+$tempDir = '/home/qualidad/ai.qualidadeweb.com.br/modules/theme_style/language/slovak/';
 $stopFile = $tempDir . '/stop';
 $notifFile = $tempDir . '/finish';
 
